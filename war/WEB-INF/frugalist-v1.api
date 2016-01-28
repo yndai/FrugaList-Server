@@ -1,0 +1,201 @@
+{
+  "extends" : "thirdParty.api",
+  "abstract" : false,
+  "root" : "https://frugalist-api.appspot.com/_ah/api",
+  "name" : "frugalist",
+  "canonicalName" : "FrugaList",
+  "version" : "v1",
+  "title" : "Frugalist API",
+  "description" : "FrugaList API",
+  "defaultVersion" : false,
+  "discovery" : [ "PUBLIC" ],
+  "adapter" : {
+    "bns" : "https://frugalist-api.appspot.com/_ah/spi",
+    "deadline" : 65.0,
+    "type" : "lily"
+  },
+  "auth" : {
+    "allowCookieAuth" : false
+  },
+  "frontendLimits" : {
+    "unregisteredUserQps" : -1,
+    "unregisteredQps" : -1,
+    "unregisteredDaily" : -1,
+    "rules" : [ ]
+  },
+  "cacheControl" : {
+    "type" : "no-cache",
+    "maxAge" : 0
+  },
+  "ownerDomain" : "frugalist.ryce.com",
+  "ownerName" : "RYCE",
+  "methods" : {
+    "frugalist.deal.add" : {
+      "path" : "post/deal/add",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ryce.frugalist.FrugaListApi.addDeal",
+      "request" : {
+        "parameters" : {
+          "authorId" : {
+            "type" : "string",
+            "required" : true
+          },
+          "description" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "frugalist.user.list" : {
+      "path" : "get/user/list",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ryce.frugalist.FrugaListApi.listUsers",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "frugalist.deal.list" : {
+      "path" : "get/deal/list",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ryce.frugalist.FrugaListApi.listDeals",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "frugalist.user.add" : {
+      "path" : "post/user/add",
+      "httpMethod" : "POST",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ryce.frugalist.FrugaListApi.addUser",
+      "request" : {
+        "parameters" : {
+          "id" : {
+            "type" : "string",
+            "required" : true
+          },
+          "email" : {
+            "type" : "string",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    }
+  },
+  "descriptor" : {
+    "schemas" : {
+      "Deal" : {
+        "id" : "Deal",
+        "type" : "object",
+        "properties" : {
+          "author" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "id" : {
+            "type" : "string",
+            "format" : "int64"
+          }
+        }
+      },
+      "User" : {
+        "id" : "User",
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "email" : {
+            "$ref" : "Email"
+          }
+        }
+      },
+      "Email" : {
+        "id" : "Email",
+        "type" : "object",
+        "properties" : {
+          "email" : {
+            "type" : "string"
+          }
+        }
+      },
+      "UserCollection" : {
+        "id" : "UserCollection",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "User"
+            }
+          }
+        }
+      },
+      "DealCollection" : {
+        "id" : "DealCollection",
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "Deal"
+            }
+          }
+        }
+      }
+    },
+    "methods" : {
+      "com.ryce.frugalist.FrugaListApi.addDeal" : {
+        "response" : {
+          "$ref" : "Deal"
+        }
+      },
+      "com.ryce.frugalist.FrugaListApi.listUsers" : {
+        "response" : {
+          "$ref" : "UserCollection"
+        }
+      },
+      "com.ryce.frugalist.FrugaListApi.listDeals" : {
+        "response" : {
+          "$ref" : "DealCollection"
+        }
+      },
+      "com.ryce.frugalist.FrugaListApi.addUser" : {
+        "response" : {
+          "$ref" : "User"
+        }
+      }
+    }
+  }
+}
