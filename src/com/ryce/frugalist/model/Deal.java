@@ -9,8 +9,8 @@ import com.googlecode.objectify.annotation.Id;
 
 @Entity
 public class Deal {
-	@Parent Key<User> author;
 	@Id Long Id;
+	Key<User> author;
 	
 	// GeoPt location;
 	// Rating rating;
