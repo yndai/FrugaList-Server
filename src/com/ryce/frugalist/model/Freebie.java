@@ -7,7 +7,7 @@ import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 
 @Entity
-public class Deal {
+public class Freebie {
 	@Id Long id;
 	
 	Key<User> author;
@@ -16,37 +16,24 @@ public class Deal {
 	String address;
 	@Index GeoPt location;
 	
-	String price;
-	String unit;
-	@Index String store;
-	@Index Integer rating;
-	
 	String description;
 	
-	private Deal() {
+	private Freebie() {
 	}
 	
-	public Deal(
+	public Freebie(
 			String userId, 
 			String product, 
 			String imageUrl, 
 			String address, 
 			Float latitude,
-			Float longitude,
-			String price,
-			String unit, 
-			String store, 
-			Integer rating, 
+			Float longitude, 
 			String description) {
 		this.author = Key.create(User.class, userId);
 		this.product = product;
 		this.imageUrl = imageUrl;
 		this.address = address;
 		this.location = new GeoPt(latitude, longitude);
-		this.price = price;
-		this.unit = unit;
-		this.store = store;
-		this.rating = rating;
 		this.description = description;
 	}
 
@@ -58,10 +45,8 @@ public class Deal {
 	}
 	
 	public String getAuthor() {
-		// output the nameId from the key
 		return author.getName();
 	}
-	//@ApiResourceProperty(ignored = AnnotationBoolean.TRUE)
 	public void setAuthor(Key<User> author) {
 		this.author = author;
 	}
@@ -94,39 +79,10 @@ public class Deal {
 		this.location = location;
 	}
 
-	public String getPrice() {
-		return price;
-	}
-	public void setPrice(String price) {
-		this.price = price;
-	}
-
-	public String getUnit() {
-		return unit;
-	}
-	public void setUnit(String unit) {
-		this.unit = unit;
-	}
-
-	public String getStore() {
-		return store;
-	}
-	public void setStore(String store) {
-		this.store = store;
-	}
-
-	public Integer getRating() {
-		return rating;
-	}
-	public void setRating(Integer rating) {
-		this.rating = rating;
-	}
-
 	public String getDescription() {
 		return description;
 	}
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
 }

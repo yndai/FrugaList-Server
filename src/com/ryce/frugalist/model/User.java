@@ -6,15 +6,16 @@ import com.googlecode.objectify.annotation.Id;
 
 @Entity
 public class User {
-
-	@Id String id;
+	@Id String id;	
+	String name;
 	Email email;
 	
 	private User() {
 	}
 	
-	public User(String id, Email email) {
+	public User(String id, String name, Email email) {
 		this.id = id;
+		this.name = name;
 		this.email = email;
 	}
 	
@@ -24,6 +25,14 @@ public class User {
 	public void setId(String id) {
 		this.id = id;
 	}
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public Email getEmail() {
 		return email;
 	}

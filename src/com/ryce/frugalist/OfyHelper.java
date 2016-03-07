@@ -2,6 +2,7 @@ package com.ryce.frugalist;
 
 import com.googlecode.objectify.ObjectifyService;
 import com.ryce.frugalist.model.Deal;
+import com.ryce.frugalist.model.Freebie;
 import com.ryce.frugalist.model.User;
 
 import javax.servlet.ServletContextListener;
@@ -20,6 +21,7 @@ public class OfyHelper implements ServletContextListener {
 		// Register Ofy entities here!
 		ObjectifyService.register(User.class);
 		ObjectifyService.register(Deal.class);
+		ObjectifyService.register(Freebie.class);
 	}
 
 	public void contextDestroyed(ServletContextEvent event) {

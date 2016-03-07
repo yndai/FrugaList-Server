@@ -11,24 +11,17 @@
 	<listener>
 		<listener-class>com.ryce.frugalist.OfyHelper</listener-class>
 	</listener>
-
-	<servlet>
-		<servlet-name>FrugaList</servlet-name>
-		<servlet-class>com.ryce.frugalist.FrugaListServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>FrugaList</servlet-name>
-		<url-pattern>/frugalist/*</url-pattern>
-	</servlet-mapping>
+	
 	<welcome-file-list>
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
+	
  <servlet>
   <servlet-name>SystemServiceServlet</servlet-name>
   <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
   <init-param>
    <param-name>services</param-name>
-   <param-value>com.ryce.frugalist.FrugaListApi</param-value>
+   <param-value>com.ryce.frugalist.DealApi,com.ryce.frugalist.FreebieApi,com.ryce.frugalist.UserApi</param-value>
   </init-param>
  </servlet>
  <servlet-mapping>
