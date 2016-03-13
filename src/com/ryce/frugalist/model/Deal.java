@@ -1,5 +1,9 @@
 package com.ryce.frugalist.model;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.appengine.api.datastore.GeoPt;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Entity;
@@ -14,13 +18,18 @@ public class Deal {
 	@Index String product;
 	String imageUrl;
 	String address;
-	@Index GeoPt location;
+	GeoPt location;
 	
 	String price;
 	String unit;
 	@Index String store;
 	@Index Integer rating;
 	
+	// store IDs of users who have upvoted/downvoted
+	// value is true for an upvote
+	Map<String, Boolean> votes = new HashMap<String, Boolean>();
+	
+	@Index Date created;
 	String description;
 	
 	private Deal() {
@@ -36,7 +45,8 @@ public class Deal {
 			String price,
 			String unit, 
 			String store, 
-			Integer rating, 
+			Integer rating,
+			Date created,
 			String description) {
 		this.author = Key.create(User.class, userId);
 		this.product = product;
@@ -47,6 +57,7 @@ public class Deal {
 		this.unit = unit;
 		this.store = store;
 		this.rating = rating;
+		this.created = created;
 		this.description = description;
 	}
 
@@ -122,11 +133,22 @@ public class Deal {
 		this.rating = rating;
 	}
 
+	public Date getCreated() {
+		return created;
+	}
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
 	public String getDescription() {
 		return description;
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Map<String, Boolean> getVotes() {
+		return votes;
 	}
 	
 }
