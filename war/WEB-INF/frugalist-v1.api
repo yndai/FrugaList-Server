@@ -30,6 +30,21 @@
   "ownerDomain" : "frugalist.ryce.com",
   "ownerName" : "RYCE",
   "methods" : {
+    "frugalist.user.list" : {
+      "path" : "user/list",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ryce.frugalist.UserApi.listUsers",
+      "request" : {
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
     "frugalist.user.add" : {
       "path" : "user/add",
       "httpMethod" : "POST",
@@ -59,15 +74,66 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "frugalist.user.list" : {
-      "path" : "user/list",
+    "frugalist.deal.search.store" : {
+      "path" : "deal/search/store",
       "httpMethod" : "GET",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ ],
       "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ryce.frugalist.UserApi.listUsers",
+      "rosyMethod" : "com.ryce.frugalist.DealApi.searchDealsByStore",
       "request" : {
+        "parameters" : {
+          "store" : {
+            "type" : "string",
+            "required" : true
+          },
+          "latitude" : {
+            "type" : "float",
+            "required" : true
+          },
+          "longitude" : {
+            "type" : "float",
+            "required" : true
+          },
+          "radius" : {
+            "type" : "int32",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "frugalist.deal.search.product" : {
+      "path" : "deal/search/product",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ryce.frugalist.DealApi.searchDealsByProduct",
+      "request" : {
+        "parameters" : {
+          "product" : {
+            "type" : "string",
+            "required" : true
+          },
+          "latitude" : {
+            "type" : "float",
+            "required" : true
+          },
+          "longitude" : {
+            "type" : "float",
+            "required" : true
+          },
+          "radius" : {
+            "type" : "int32",
+            "required" : true
+          }
+        },
         "body" : "empty"
       },
       "response" : {
@@ -131,6 +197,27 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
+    "frugalist.deal.delete" : {
+      "path" : "deal/delete",
+      "httpMethod" : "DELETE",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ryce.frugalist.DealApi.deleteDeal",
+      "request" : {
+        "parameters" : {
+          "id" : {
+            "type" : "int64",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
     "frugalist.deal.list" : {
       "path" : "deal/list",
       "httpMethod" : "GET",
@@ -175,51 +262,9 @@
         "body" : "autoTemplate(backendResponse)"
       }
     },
-    "frugalist.deal" : {
-      "path" : "deal",
-      "httpMethod" : "GET",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ryce.frugalist.DealApi.getDeal",
-      "request" : {
-        "parameters" : {
-          "id" : {
-            "type" : "int64",
-            "required" : true
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
-    "frugalist.deal.delete" : {
-      "path" : "deal/delete",
-      "httpMethod" : "DELETE",
-      "authLevel" : "NONE",
-      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
-      "audiences" : [ ],
-      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
-      "rosyMethod" : "com.ryce.frugalist.DealApi.deleteDeal",
-      "request" : {
-        "parameters" : {
-          "id" : {
-            "type" : "int64",
-            "required" : true
-          }
-        },
-        "body" : "empty"
-      },
-      "response" : {
-        "body" : "autoTemplate(backendResponse)"
-      }
-    },
     "frugalist.deal.update.rating" : {
       "path" : "deal/update/rating",
-      "httpMethod" : "DELETE",
+      "httpMethod" : "PUT",
       "authLevel" : "NONE",
       "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
       "audiences" : [ ],
@@ -237,6 +282,27 @@
           },
           "upvote" : {
             "type" : "boolean",
+            "required" : true
+          }
+        },
+        "body" : "empty"
+      },
+      "response" : {
+        "body" : "autoTemplate(backendResponse)"
+      }
+    },
+    "frugalist.deal" : {
+      "path" : "deal",
+      "httpMethod" : "GET",
+      "authLevel" : "NONE",
+      "scopes" : [ "https://www.googleapis.com/auth/userinfo.email" ],
+      "audiences" : [ ],
+      "clientIds" : [ "292824132082.apps.googleusercontent.com" ],
+      "rosyMethod" : "com.ryce.frugalist.DealApi.getDeal",
+      "request" : {
+        "parameters" : {
+          "id" : {
+            "type" : "int64",
             "required" : true
           }
         },
@@ -373,19 +439,34 @@
       }
     },
     "methods" : {
-      "com.ryce.frugalist.UserApi.addUser" : {
-        "response" : {
-          "$ref" : "User"
-        }
-      },
       "com.ryce.frugalist.UserApi.listUsers" : {
         "response" : {
           "$ref" : "UserCollection"
         }
       },
+      "com.ryce.frugalist.UserApi.addUser" : {
+        "response" : {
+          "$ref" : "User"
+        }
+      },
+      "com.ryce.frugalist.DealApi.searchDealsByStore" : {
+        "response" : {
+          "$ref" : "DealCollection"
+        }
+      },
+      "com.ryce.frugalist.DealApi.searchDealsByProduct" : {
+        "response" : {
+          "$ref" : "DealCollection"
+        }
+      },
       "com.ryce.frugalist.DealApi.addDeal" : {
         "response" : {
           "$ref" : "Deal"
+        }
+      },
+      "com.ryce.frugalist.DealApi.deleteDeal" : {
+        "response" : {
+          "$ref" : "ResponseMsg"
         }
       },
       "com.ryce.frugalist.DealApi.listDeals" : {
@@ -398,17 +479,12 @@
           "$ref" : "DealCollection"
         }
       },
-      "com.ryce.frugalist.DealApi.getDeal" : {
+      "com.ryce.frugalist.DealApi.updateDealRating" : {
         "response" : {
           "$ref" : "Deal"
         }
       },
-      "com.ryce.frugalist.DealApi.deleteDeal" : {
-        "response" : {
-          "$ref" : "ResponseMsg"
-        }
-      },
-      "com.ryce.frugalist.DealApi.updateDealRating" : {
+      "com.ryce.frugalist.DealApi.getDeal" : {
         "response" : {
           "$ref" : "Deal"
         }
