@@ -11,10 +11,10 @@ public class Freebie {
 	@Id Long id;
 	
 	Key<User> author;
-	@Index String product;
+	String product;
 	String imageUrl;
 	String address;
-	@Index GeoPt location;
+	GeoPt location;
 	
 	String description;
 	

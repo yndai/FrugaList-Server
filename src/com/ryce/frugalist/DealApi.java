@@ -34,6 +34,7 @@ public class DealApi {
 
 	/**
 	 * GET ALL DEALS
+	 * - Descending order by create date
 	 * @return
 	 */
 	@ApiMethod(name = "deal.list",
@@ -41,14 +42,87 @@ public class DealApi {
 		       httpMethod = HttpMethod.GET)
 	public List<Deal> listDeals() {
 		List<Deal> deals = ObjectifyService.ofy()
-				.load().type(Deal.class).list();
+				.load().type(Deal.class).order("-created").list();
 		return deals;
 	}
 	
-	// TODO: search by product and by store (maybe address instead??)
+	/**
+	 * SEARCH DEALS BY PRODUCT
+	 * - Descending order by create date
+	 * - Filtered for nearest
+	 * @param product
+	 * @param latitude
+	 * @param longitude
+	 * @param radius
+	 * @return
+	 */
+	@ApiMethod(name = "deal.search.product",
+		       path = "deal/search/product",
+		       httpMethod = HttpMethod.GET)
+	public List<Deal> searchDealsByProduct(
+			@Named("product") String product,
+			@Named("latitude") Float latitude,
+			@Named("longitude") Float longitude,
+			@Named("radius") Integer radius
+		) {
+		List<Deal> deals = ObjectifyService.ofy()
+				.load().type(Deal.class).order("-created").list();
+		
+		List<Deal> filtered = new LinkedList<Deal>();
+		
+		// Note: GAE does not support substring filter,
+		// so just manually filter
+		final String lcProduct = product.toLowerCase();
+		for (Deal deal : deals) {
+			if (deal.getProduct().toLowerCase().contains(lcProduct)) {
+				filtered.add(deal);
+			}
+		}
+		
+		// filter for nearest
+		return filterNearest(filtered, latitude, longitude, radius);
+	}
+	
+	/**
+	 * SEARCH DEALS BY STORE
+	 * - Descending order by create date
+	 * - Filtered for nearest
+	 * @param store
+	 * @param latitude
+	 * @param longitude
+	 * @param radius
+	 * @return
+	 */
+	@ApiMethod(name = "deal.search.store",
+		       path = "deal/search/store",
+		       httpMethod = HttpMethod.GET)
+	public List<Deal> searchDealsByStore(
+			@Named("store") String store,
+			@Named("latitude") Float latitude,
+			@Named("longitude") Float longitude,
+			@Named("radius") Integer radius
+		) {
+		List<Deal> deals = ObjectifyService.ofy()
+				.load().type(Deal.class).order("-created").list();
+		
+		List<Deal> filtered = new LinkedList<Deal>();
+		
+		// Note: GAE does not support substring filter,
+		// so just manually filter
+		final String lcStore = store.toLowerCase();
+		for (Deal deal : deals) {
+			if (deal.getStore().toLowerCase().contains(lcStore)) {
+				filtered.add(deal);
+			}
+		}
+		
+		// filter for nearest
+		return filterNearest(filtered, latitude, longitude, radius);
+	}
 	
 	/**
 	 * GET NEAREST DEALS
+	 * - Descending order by created date
 	 * @param latitude
 	 * @param longitude
 	 * @param radius (in KM)
@@ -64,20 +138,10 @@ public class DealApi {
 		) {
 		
 		List<Deal> deals = ObjectifyService.ofy()
-				.load().type(Deal.class).list();
+				.load().type(Deal.class).order("-created").list();
 		
-		// filter out deals that are further than given radius
-		List<Deal> filtered = new LinkedList<Deal>();
-		for (Deal deal : deals) {
-			final double dist = Util.getDistanceH(
-					deal.getLocation().getLatitude(), 
-					deal.getLocation().getLongitude(), 
-					latitude, 
-					longitude);
-			if (dist <= radius) {
-				filtered.add(deal);
-			}
-		}
+		// filter for nearest
+		List<Deal> filtered = filterNearest(deals, latitude, longitude, radius);
 		
 		return filtered;
 	}
@@ -155,7 +219,7 @@ public class DealApi {
 	 */
 	@ApiMethod(name = "deal.update.rating",
 		       path = "deal/update/rating",
-		       httpMethod = HttpMethod.DELETE)
+		       httpMethod = HttpMethod.PUT)
 	public Deal updateDealRating(
 			@Named("id") Long id,
 			@Named("userId") String userId,
@@ -222,5 +286,34 @@ public class DealApi {
 		Key<Deal> key = Key.create(Deal.class, id);
 		ObjectifyService.ofy().delete().key(key).now();
 		return new ResponseMsg("Deal deleted");
+	}
+	
+	/* ---------- HELPERS ---------- */
+	
+	/**
+	 * Filter out deals that are further than a given radius
+	 * @param deals
+	 * @param latitude
+	 * @param longitude
+	 * @param radius
+	 * @return
+	 */
+	private List<Deal> filterNearest(
+			List<Deal> deals, double latitude, double longitude, int radius) {
+		
+		List<Deal> filtered = new LinkedList<Deal>();
+		
+		for (Deal deal : deals) {
+			final double dist = Util.getDistanceH(
+					deal.getLocation().getLatitude(), 
+					deal.getLocation().getLongitude(), 
+					latitude, 
+					longitude);
+			if (dist <= radius) {
+				filtered.add(deal);
+			}
+		}
+		
+		return filtered;
 	}
 }

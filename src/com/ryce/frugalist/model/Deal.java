@@ -15,15 +15,15 @@ public class Deal {
 	@Id Long id;
 	
 	Key<User> author;
-	@Index String product;
+	String product;
 	String imageUrl;
 	String address;
 	GeoPt location;
 	
 	String price;
 	String unit;
-	@Index String store;
-	@Index Integer rating;
+	String store;
+	Integer rating;
 	
 	// store IDs of users who have upvoted/downvoted
 	// value is true for an upvote
