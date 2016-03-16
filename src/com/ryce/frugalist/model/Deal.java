@@ -14,7 +14,7 @@ import com.googlecode.objectify.annotation.Index;
 public class Deal {
 	@Id Long id;
 	
-	Key<User> author;
+	@Index Key<User> author;
 	String product;
 	String imageUrl;
 	String address;

@@ -1,9 +1,8 @@
 package com.ryce.frugalist.model;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.google.appengine.api.datastore.Email;
-import com.googlecode.objectify.Key;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 
@@ -11,15 +10,16 @@ import com.googlecode.objectify.annotation.Id;
 public class User {
 	@Id String id;	
 	String name;
-	Email email;
+	
+	// A set of bookmarked listings
+	Set<Long> bookmarks = new HashSet<Long>();
 	
 	private User() {
 	}
 	
-	public User(String id, String name, Email email) {
+	public User(String id, String name) {
 		this.id = id;
 		this.name = name;
-		this.email = email;
 	}
 	
 	public String getId() {
@@ -36,11 +36,11 @@ public class User {
 		this.name = name;
 	}
 
-	public Email getEmail() {
-		return email;
+	public Set<Long> getBookmarks() {
+		return bookmarks;
 	}
-	public void setEmail(Email email) {
-		this.email = email;
+	public void setBookmarks(Set<Long> bookmarks) {
+		this.bookmarks = bookmarks;
 	}
 	
 }

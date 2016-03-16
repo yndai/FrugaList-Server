@@ -1,10 +1,13 @@
 package com.ryce.frugalist;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Named;
+import javax.servlet.http.HttpServletRequest;
 
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
@@ -14,6 +17,7 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import com.ryce.frugalist.model.Deal;
+import com.ryce.frugalist.model.User;
 import com.ryce.frugalist.util.Util;
 import com.ryce.frugalist.util.Util.ResponseMsg;
 
@@ -35,14 +39,20 @@ public class DealApi {
 	/**
 	 * GET ALL DEALS
 	 * - Descending order by create date
+	 * @param request
 	 * @return
 	 */
 	@ApiMethod(name = "deal.list",
 		       path = "deal/list",
 		       httpMethod = HttpMethod.GET)
-	public List<Deal> listDeals() {
+	public List<Deal> listDeals(
+			HttpServletRequest request
+		) {
 		List<Deal> deals = ObjectifyService.ofy()
-				.load().type(Deal.class).order("-created").list();
+				.load()
+				.type(Deal.class)
+				.order("-created")
+				.list();
 		return deals;
 	}
 	
@@ -50,6 +60,7 @@ public class DealApi {
 	 * SEARCH DEALS BY PRODUCT
 	 * - Descending order by create date
 	 * - Filtered for nearest
+	 * @param request
 	 * @param product
 	 * @param latitude
 	 * @param longitude
@@ -60,13 +71,17 @@ public class DealApi {
 		       path = "deal/search/product",
 		       httpMethod = HttpMethod.GET)
 	public List<Deal> searchDealsByProduct(
+			HttpServletRequest request,
 			@Named("product") String product,
 			@Named("latitude") Float latitude,
 			@Named("longitude") Float longitude,
 			@Named("radius") Integer radius
 		) {
 		List<Deal> deals = ObjectifyService.ofy()
-				.load().type(Deal.class).order("-created").list();
+				.load()
+				.type(Deal.class)
+				.order("-created")
+				.list();
 		
 		List<Deal> filtered = new LinkedList<Deal>();
 		
@@ -87,6 +102,7 @@ public class DealApi {
 	 * SEARCH DEALS BY STORE
 	 * - Descending order by create date
 	 * - Filtered for nearest
+	 * @param request
 	 * @param store
 	 * @param latitude
 	 * @param longitude
@@ -97,13 +113,17 @@ public class DealApi {
 		       path = "deal/search/store",
 		       httpMethod = HttpMethod.GET)
 	public List<Deal> searchDealsByStore(
+			HttpServletRequest request,
 			@Named("store") String store,
 			@Named("latitude") Float latitude,
 			@Named("longitude") Float longitude,
 			@Named("radius") Integer radius
 		) {
 		List<Deal> deals = ObjectifyService.ofy()
-				.load().type(Deal.class).order("-created").list();
+				.load()
+				.type(Deal.class)
+				.order("-created")
+				.list();
 		
 		List<Deal> filtered = new LinkedList<Deal>();
 		
@@ -121,24 +141,97 @@ public class DealApi {
 	}
 	
 	/**
+	 * GET ALL DEALS BY AUTHOR
+	 * - Descending order by create date
+	 * @param request
+	 * @param authorId
+	 * @return
+	 */
+	@ApiMethod(name = "deal.list.byauthor",
+		       path = "deal/list/byauthor",
+		       httpMethod = HttpMethod.GET)
+	public List<Deal> listDealsByAuthor(
+			HttpServletRequest request,
+			@Named("authorId") String authorId
+		) {
+		Key<User> authorKey = Key.create(User.class, authorId);
+		
+		List<Deal> deals = ObjectifyService.ofy()
+				.load()
+				.type(Deal.class)
+				.filter("author", authorKey)
+				.order("-created")
+				.list();
+		
+		return deals;
+	}
+	
+	/**
+	 * GET ALL DEALS BOOKMARKED BY USER
+	 * - Descending order by create date
+	 * @param request
+	 * @param authorId
+	 * @return
+	 * @throws NotFoundException 
+	 */
+	@ApiMethod(name = "deal.list.bookmarks",
+		       path = "deal/list/bookmarks",
+		       httpMethod = HttpMethod.GET)
+	public Collection<Deal> listBookmarks(
+			HttpServletRequest request,
+			@Named("userId") String userId
+		) throws NotFoundException {
+		
+		// fetch user
+		Key<User> userKey = Key.create(User.class, userId);
+		User user = ObjectifyService.ofy().load().key(userKey).now();
+		
+		if (user == null)
+			throw new NotFoundException("User not found");
+		
+		// verify use actually has bookmarks
+		if (!user.getBookmarks().isEmpty()) {
+			
+			// fetch deals within bookmarks set
+			Collection<Deal> deals = ObjectifyService.ofy()
+					.load()
+					.type(Deal.class)
+					.ids(user.getBookmarks())
+					.values();
+			
+			return deals;
+			
+		} else {	
+			// just return an empty list
+			return new ArrayList<Deal>(0);
+		}
+		
+	}
+	
+	/**
 	 * GET NEAREST DEALS
 	 * - Descending order by created date
+	 * @param request
 	 * @param latitude
 	 * @param longitude
 	 * @param radius (in KM)
 	 * @return
 	 */
 	@ApiMethod(name = "deal.list.near",
-		       path = "deal/list.near",
+		       path = "deal/list/near",
 		       httpMethod = HttpMethod.GET)
 	public List<Deal> nearestDeals(
+			HttpServletRequest request,
 			@Named("latitude") Float latitude,
 			@Named("longitude") Float longitude,
 			@Named("radius") Integer radius
 		) {
 		
 		List<Deal> deals = ObjectifyService.ofy()
-				.load().type(Deal.class).order("-created").list();
+				.load()
+				.type(Deal.class)
+				.order("-created")
+				.list();
 		
 		// filter for nearest
 		List<Deal> filtered = filterNearest(deals, latitude, longitude, radius);
@@ -148,6 +241,7 @@ public class DealApi {
 	
 	/**
 	 * GET DEAL BY ID
+	 * @param request
 	 * @param id
 	 * @return
 	 * @throws com.google.api.server.spi.response.NotFoundException 
@@ -156,6 +250,7 @@ public class DealApi {
 		       path = "deal",
 		       httpMethod = HttpMethod.GET)
 	public Deal getDeal(
+			HttpServletRequest request,
 			@Named("id") Long id
 		) throws NotFoundException {
 		Key<Deal> key = Key.create(Deal.class, id);
@@ -167,6 +262,7 @@ public class DealApi {
 	
 	/**
 	 * ADD DEAL
+	 * @param request
 	 * @param authorId
 	 * @param product
 	 * @param imageUrl
@@ -184,6 +280,7 @@ public class DealApi {
 		       path = "deal/add",
 		       httpMethod = HttpMethod.POST)
 	public Deal addDeal(
+			HttpServletRequest request,
 			@Named("authorId") String authorId,
 			@Named("product") String product,
 			@Named("imageUrl") String imageUrl,
@@ -214,6 +311,7 @@ public class DealApi {
 	
 	/**
 	 * UPDATE DEAL RATING
+	 * @param request
 	 * @param id
 	 * @return
 	 */
@@ -221,6 +319,7 @@ public class DealApi {
 		       path = "deal/update/rating",
 		       httpMethod = HttpMethod.PUT)
 	public Deal updateDealRating(
+			HttpServletRequest request,
 			@Named("id") Long id,
 			@Named("userId") String userId,
 			@Named("upvote") Boolean upvote
@@ -274,6 +373,7 @@ public class DealApi {
 	
 	/**
 	 * DELETE DEAL
+	 * @param request
 	 * @param id
 	 * @return
 	 */
@@ -281,6 +381,7 @@ public class DealApi {
 		       path = "deal/delete",
 		       httpMethod = HttpMethod.DELETE)
 	public ResponseMsg deleteDeal(
+			HttpServletRequest request,
 			@Named("id") Long id
 	) {
 		Key<Deal> key = Key.create(Deal.class, id);

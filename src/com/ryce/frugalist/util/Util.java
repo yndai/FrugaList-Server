@@ -1,10 +1,22 @@
 package com.ryce.frugalist.util;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class Util {
 
 	private Util() {
 	}
 
+	/**
+	 * Returns true if request auth header matches the secret key
+	 * @param request
+	 * @return
+	 */
+	public static boolean verifyClientKey(HttpServletRequest request) {
+		final String auth = request.getHeader("Authorization").trim();
+		return Constants.SECRET_CLIENT_KEY.equals(auth);
+	}
+	
 	/**
 	 * Calculate distance (in meters) between two geographical points This is
 	 * the Vincenty formula from
