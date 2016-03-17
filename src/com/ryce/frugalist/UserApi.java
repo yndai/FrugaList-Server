@@ -66,20 +66,22 @@ public class UserApi {
 	}
 	
 	/**
-	 * GET USER BY ID
+	 * ADD OR DELETE BOOKMARK
 	 * @param request
 	 * @param id
 	 * @param dealId
+	 * @param add
 	 * @return
 	 * @throws NotFoundException 
 	 */
-	@ApiMethod(name = "user.update.addbookmark",
-		       path = "user/update/addbookmark",
+	@ApiMethod(name = "user.update.bookmark",
+		       path = "user/update/bookmark",
 		       httpMethod = HttpMethod.PUT)
 	public User addBookmark(
 			HttpServletRequest request,
 			@Named("id") String id,
-			@Named("dealId") Long dealId
+			@Named("dealId") Long dealId,
+			@Named("add") Boolean add
 		) throws NotFoundException {
 		
 		Key<User> key = Key.create(User.class, id);
@@ -88,8 +90,14 @@ public class UserApi {
 		if (user == null)
 			throw new NotFoundException("User not found");
 		
-		// add deal id to bookmarks
-		user.getBookmarks().add(dealId);
+		// add or delete the bookmark
+		if (add) {
+			// add deal id to bookmarks
+			user.getBookmarks().add(dealId);
+		} else {
+			// remove deal id from bookmarks
+			user.getBookmarks().remove(dealId);
+		}
 		
 		// update user
 		ObjectifyService.ofy().save().entity(user).now();
