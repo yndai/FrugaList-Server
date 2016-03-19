@@ -9,6 +9,7 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.config.ApiNamespace;
+import com.google.api.server.spi.config.Nullable;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.appengine.api.datastore.Email;
 import com.googlecode.objectify.Key;
@@ -49,19 +50,29 @@ public class UserApi {
 	}
 	
 	/**
-	 * GET USER BY ID
+	 * GET USER BY ID OR CREATE
 	 * @param request
 	 * @return
 	 */
-	@ApiMethod(name = "user",
-		       path = "user",
+	@ApiMethod(name = "user.getOrCreate",
+		       path = "user/getOrCreate",
 		       httpMethod = HttpMethod.GET)
-	public User getUser(
+	public User getOrCreateUser(
 			HttpServletRequest request,
-			@Named("id") String id
+			@Named("id") String id,
+			@Nullable @Named("name") String name
 		) {
+		
+		// fetch user
 		Key<User> key = Key.create(User.class, id);
 		User user = ObjectifyService.ofy().load().key(key).now();
+		
+		// if user does not exist, create and save
+		if (user == null) {
+			user = new User(id, name);
+			ObjectifyService.ofy().save().entity(user).now();
+		}
+		
 		return user;
 	}
 	
