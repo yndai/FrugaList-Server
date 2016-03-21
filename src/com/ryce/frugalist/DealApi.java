@@ -3,8 +3,10 @@ package com.ryce.frugalist;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +15,7 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.config.ApiNamespace;
+import com.google.api.server.spi.config.Nullable;
 import com.google.api.server.spi.response.NotFoundException;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
@@ -36,6 +39,14 @@ import com.ryce.frugalist.util.Util.ResponseMsg;
 )
 public class DealApi {
 
+	/** Enum of sort codes */	
+	private static Map<Integer, String> sortTypeMap = new HashMap<Integer, String>();
+	static {
+		sortTypeMap.put(0, "-created"); // Date descending
+		sortTypeMap.put(1, "-rating"); // Rating descending
+		sortTypeMap.put(2, "price"); // Price ascending
+	}
+	
 	/**
 	 * GET ALL DEALS
 	 * - Descending order by create date
@@ -73,14 +84,18 @@ public class DealApi {
 	public List<Deal> searchDealsByProduct(
 			HttpServletRequest request,
 			@Named("product") String product,
-			@Named("latitude") Float latitude,
-			@Named("longitude") Float longitude,
-			@Named("radius") Integer radius
+			@Nullable @Named("latitude") Float latitude,
+			@Nullable @Named("longitude") Float longitude,
+			@Nullable @Named("radius") Integer radius,
+			@Nullable @Named("sortType") Integer sortType
 		) {
+		
+		String order = sortType == null ? "-created" : sortTypeMap.get(sortType);
+		
 		List<Deal> deals = ObjectifyService.ofy()
 				.load()
 				.type(Deal.class)
-				.order("-created")
+				.order(order)
 				.list();
 		
 		List<Deal> filtered = new LinkedList<Deal>();
@@ -94,8 +109,12 @@ public class DealApi {
 			}
 		}
 		
-		// filter for nearest
-		return filterNearest(filtered, latitude, longitude, radius);
+		if (latitude != null && longitude != null && radius != null) {
+			// filter for nearest
+			return filterNearest(filtered, latitude, longitude, radius);
+		} else {
+			return filtered;
+		}
 	}
 	
 	/**
@@ -115,14 +134,18 @@ public class DealApi {
 	public List<Deal> searchDealsByStore(
 			HttpServletRequest request,
 			@Named("store") String store,
-			@Named("latitude") Float latitude,
-			@Named("longitude") Float longitude,
-			@Named("radius") Integer radius
+			@Nullable @Named("latitude") Float latitude,
+			@Nullable @Named("longitude") Float longitude,
+			@Nullable @Named("radius") Integer radius,
+			@Nullable @Named("sortType") Integer sortType
 		) {
+		
+		String order = sortType == null ? "-created" : sortTypeMap.get(sortType);
+		
 		List<Deal> deals = ObjectifyService.ofy()
 				.load()
 				.type(Deal.class)
-				.order("-created")
+				.order(order)
 				.list();
 		
 		List<Deal> filtered = new LinkedList<Deal>();
@@ -136,8 +159,12 @@ public class DealApi {
 			}
 		}
 		
-		// filter for nearest
-		return filterNearest(filtered, latitude, longitude, radius);
+		if (latitude != null && longitude != null && radius != null) {
+			// filter for nearest
+			return filterNearest(filtered, latitude, longitude, radius);
+		} else {
+			return filtered;
+		}
 	}
 	
 	/**

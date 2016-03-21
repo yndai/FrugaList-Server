@@ -20,10 +20,10 @@ public class Deal {
 	String address;
 	GeoPt location;
 	
-	String price;
+	@Index String price;
 	String unit;
 	String store;
-	Integer rating;
+	@Index Integer rating;
 	
 	// store IDs of users who have upvoted/downvoted
 	// value is true for an upvote
