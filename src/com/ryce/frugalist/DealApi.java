@@ -317,7 +317,7 @@ public class DealApi {
 			@Named("price") String price,
 			@Named("unit") String unit,
 			@Named("store") String store,
-			@Named("description") String description
+			@Nullable @Named("description") String description
 		) {
 		Deal deal = new Deal(
 				authorId,
