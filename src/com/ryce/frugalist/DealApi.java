@@ -17,6 +17,7 @@ import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Nullable;
 import com.google.api.server.spi.response.NotFoundException;
+import com.google.api.server.spi.response.UnauthorizedException;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import com.ryce.frugalist.model.Deal;
@@ -52,13 +53,17 @@ public class DealApi {
 	 * - Descending order by create date
 	 * @param request
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "deal.list",
 		       path = "deal/list",
 		       httpMethod = HttpMethod.GET)
 	public List<Deal> listDeals(
 			HttpServletRequest request
-		) {
+		) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
+		
 		List<Deal> deals = ObjectifyService.ofy()
 				.load()
 				.type(Deal.class)
@@ -77,6 +82,7 @@ public class DealApi {
 	 * @param longitude
 	 * @param radius
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "deal.search.product",
 		       path = "deal/search/product",
@@ -88,7 +94,9 @@ public class DealApi {
 			@Nullable @Named("longitude") Float longitude,
 			@Nullable @Named("radius") Integer radius,
 			@Nullable @Named("sortType") Integer sortType
-		) {
+		) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
 		
 		String order = sortType == null ? "-created" : sortTypeMap.get(sortType);
 		
@@ -127,6 +135,7 @@ public class DealApi {
 	 * @param longitude
 	 * @param radius
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "deal.search.store",
 		       path = "deal/search/store",
@@ -138,7 +147,9 @@ public class DealApi {
 			@Nullable @Named("longitude") Float longitude,
 			@Nullable @Named("radius") Integer radius,
 			@Nullable @Named("sortType") Integer sortType
-		) {
+		) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
 		
 		String order = sortType == null ? "-created" : sortTypeMap.get(sortType);
 		
@@ -173,6 +184,7 @@ public class DealApi {
 	 * @param request
 	 * @param authorId
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "deal.list.byauthor",
 		       path = "deal/list/byauthor",
@@ -180,7 +192,10 @@ public class DealApi {
 	public List<Deal> listDealsByAuthor(
 			HttpServletRequest request,
 			@Named("authorId") String authorId
-		) {
+		) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
+		
 		Key<User> authorKey = Key.create(User.class, authorId);
 		
 		List<Deal> deals = ObjectifyService.ofy()
@@ -200,6 +215,7 @@ public class DealApi {
 	 * @param authorId
 	 * @return
 	 * @throws NotFoundException 
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "deal.list.bookmarks",
 		       path = "deal/list/bookmarks",
@@ -207,7 +223,9 @@ public class DealApi {
 	public Collection<Deal> listBookmarks(
 			HttpServletRequest request,
 			@Named("userId") String userId
-		) throws NotFoundException {
+		) throws NotFoundException, UnauthorizedException {
+		
+		Util.verifyClientKey(request);
 		
 		// fetch user
 		Key<User> userKey = Key.create(User.class, userId);
@@ -243,6 +261,7 @@ public class DealApi {
 	 * @param longitude
 	 * @param radius (in KM)
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "deal.list.near",
 		       path = "deal/list/near",
@@ -252,7 +271,9 @@ public class DealApi {
 			@Named("latitude") Float latitude,
 			@Named("longitude") Float longitude,
 			@Named("radius") Integer radius
-		) {
+		) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
 		
 		List<Deal> deals = ObjectifyService.ofy()
 				.load()
@@ -272,6 +293,7 @@ public class DealApi {
 	 * @param id
 	 * @return
 	 * @throws com.google.api.server.spi.response.NotFoundException 
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "deal",
 		       path = "deal",
@@ -279,7 +301,10 @@ public class DealApi {
 	public Deal getDeal(
 			HttpServletRequest request,
 			@Named("id") Long id
-		) throws NotFoundException {
+		) throws NotFoundException, UnauthorizedException {
+		
+		Util.verifyClientKey(request);
+		
 		Key<Deal> key = Key.create(Deal.class, id);
 		Deal deal = ObjectifyService.ofy().load().key(key).now();
 		if (deal == null) 
@@ -302,6 +327,7 @@ public class DealApi {
 	 * @param rating
 	 * @param description
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "deal.add",
 		       path = "deal/add",
@@ -318,7 +344,10 @@ public class DealApi {
 			@Named("unit") String unit,
 			@Named("store") String store,
 			@Nullable @Named("description") String description
-		) {
+		) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
+		
 		Deal deal = new Deal(
 				authorId,
 				product,
@@ -341,6 +370,7 @@ public class DealApi {
 	 * @param request
 	 * @param id
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "deal.update.rating",
 		       path = "deal/update/rating",
@@ -350,7 +380,10 @@ public class DealApi {
 			@Named("id") Long id,
 			@Named("userId") String userId,
 			@Named("upvote") Boolean upvote
-	) throws NotFoundException {
+	) throws NotFoundException, UnauthorizedException {
+		
+		Util.verifyClientKey(request);
+		
 		Key<Deal> dealKey = Key.create(Deal.class, id);
 		Deal deal = ObjectifyService.ofy().load().key(dealKey).now();
 		
@@ -403,6 +436,7 @@ public class DealApi {
 	 * @param request
 	 * @param id
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "deal.delete",
 		       path = "deal/delete",
@@ -410,7 +444,10 @@ public class DealApi {
 	public ResponseMsg deleteDeal(
 			HttpServletRequest request,
 			@Named("id") Long id
-	) {
+	) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
+		
 		Key<Deal> key = Key.create(Deal.class, id);
 		ObjectifyService.ofy().delete().key(key).now();
 		return new ResponseMsg("Deal deleted");

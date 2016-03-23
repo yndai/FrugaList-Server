@@ -2,19 +2,30 @@ package com.ryce.frugalist.util;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.google.api.server.spi.response.UnauthorizedException;
+
 public class Util {
 
+	// flag for enabling request authorization
+	private static final boolean ENABLE_AUTH = true;
+	
 	private Util() {
 	}
 
 	/**
-	 * Returns true if request auth header matches the secret key
+	 * Checks if request auth header matches the secret key,
+	 * throws UnauthorizedException if not
+	 * Use ENABLE_AUTH to enable/disable
 	 * @param request
-	 * @return
+	 * @throws UnauthorizedException 
 	 */
-	public static boolean verifyClientKey(HttpServletRequest request) {
-		final String auth = request.getHeader("Authorization").trim();
-		return Constants.SECRET_CLIENT_KEY.equals(auth);
+	public static void verifyClientKey(HttpServletRequest request) throws UnauthorizedException {
+		if (ENABLE_AUTH) {
+			String auth = request.getHeader("Authorization");
+			if (auth == null || !Constants.SECRET_CLIENT_KEY.equals(auth.trim())) {
+				throw new UnauthorizedException("Bad/missing client key");
+			}
+		}
 	}
 	
 	/**

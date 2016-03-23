@@ -11,10 +11,12 @@ import com.google.api.server.spi.config.ApiMethod.HttpMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Nullable;
 import com.google.api.server.spi.response.NotFoundException;
+import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.appengine.api.datastore.Email;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import com.ryce.frugalist.model.User;
+import com.ryce.frugalist.util.Util;
 
 @Api(
 	name = "frugalist",
@@ -35,13 +37,17 @@ public class UserApi {
 	 * LIST ALL USERS
 	 * @param request
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "user.list",
 		       path = "user/list",
 		       httpMethod = HttpMethod.GET)
 	public List<User> listUsers(
 			HttpServletRequest request
-		) {
+		) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
+		
 		List<User> users = ObjectifyService.ofy()
 				.load()
 				.type(User.class)
@@ -53,6 +59,7 @@ public class UserApi {
 	 * GET USER BY ID OR CREATE
 	 * @param request
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "user.getOrCreate",
 		       path = "user/getOrCreate",
@@ -61,7 +68,9 @@ public class UserApi {
 			HttpServletRequest request,
 			@Named("id") String id,
 			@Nullable @Named("name") String name
-		) {
+		) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
 		
 		// fetch user
 		Key<User> key = Key.create(User.class, id);
@@ -84,6 +93,7 @@ public class UserApi {
 	 * @param add
 	 * @return
 	 * @throws NotFoundException 
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "user.update.bookmark",
 		       path = "user/update/bookmark",
@@ -93,7 +103,9 @@ public class UserApi {
 			@Named("id") String id,
 			@Named("dealId") Long dealId,
 			@Named("add") Boolean add
-		) throws NotFoundException {
+		) throws NotFoundException, UnauthorizedException {
+		
+		Util.verifyClientKey(request);
 		
 		Key<User> key = Key.create(User.class, id);
 		User user = ObjectifyService.ofy().load().key(key).now();
@@ -122,6 +134,7 @@ public class UserApi {
 	 * @param id
 	 * @param name
 	 * @return
+	 * @throws UnauthorizedException 
 	 */
 	@ApiMethod(name = "user.add",
 		       path = "user/add",
@@ -130,7 +143,10 @@ public class UserApi {
 			HttpServletRequest request,
 			@Named("id") String id,
 			@Named("name") String name
-		) {
+		) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
+		
 		User user = new User(id, name);
 		Key<User> userKey = 
 				ObjectifyService.ofy()
