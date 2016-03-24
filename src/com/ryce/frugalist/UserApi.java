@@ -12,7 +12,6 @@ import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Nullable;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
-import com.google.appengine.api.datastore.Email;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
 import com.ryce.frugalist.model.User;

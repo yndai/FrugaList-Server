@@ -48,10 +48,15 @@ public class DealApi {
 		sortTypeMap.put(2, "price"); // Price ascending
 	}
 	
+	/****************************************************
+	 * DEAL LIST METHODS
+	 ****************************************************/
+	
 	/**
 	 * GET ALL DEALS
 	 * - Descending order by create date
 	 * @param request
+	 * @param ratingThresh
 	 * @return
 	 * @throws UnauthorizedException 
 	 */
@@ -59,7 +64,8 @@ public class DealApi {
 		       path = "deal/list",
 		       httpMethod = HttpMethod.GET)
 	public List<Deal> listDeals(
-			HttpServletRequest request
+			HttpServletRequest request,
+			@Nullable @Named("ratingThreshold") Integer ratingThresh
 		) throws UnauthorizedException {
 		
 		Util.verifyClientKey(request);
@@ -69,7 +75,46 @@ public class DealApi {
 				.type(Deal.class)
 				.order("-created")
 				.list();
-		return deals;
+		
+		return filterRatingThreshold(deals, ratingThresh);
+	}
+	
+	/**
+	 * GET NEAREST DEALS
+	 * - Descending order by created date
+	 * @param request
+	 * @param latitude
+	 * @param longitude
+	 * @param radius (in KM)
+	 * @param ratingThresh
+	 * @return
+	 * @throws UnauthorizedException 
+	 */
+	@ApiMethod(name = "deal.list.near",
+		       path = "deal/list/near",
+		       httpMethod = HttpMethod.GET)
+	public List<Deal> nearestDeals(
+			HttpServletRequest request,
+			@Named("latitude") Float latitude,
+			@Named("longitude") Float longitude,
+			@Named("radius") Integer radius,
+			@Nullable @Named("ratingThreshold") Integer ratingThresh
+		) throws UnauthorizedException {
+		
+		Util.verifyClientKey(request);
+				
+		// get sorted list
+		List<Deal> deals = ObjectifyService.ofy()
+				.load()
+				.type(Deal.class)
+				.order("-created")
+				.list();
+		
+		// filter on rating threshold
+		List<Deal> ratingFiltered = filterRatingThreshold(deals, ratingThresh);
+		
+		// filter for nearest
+		return filterNearest(ratingFiltered, latitude, longitude, radius);
 	}
 	
 	/**
@@ -81,6 +126,7 @@ public class DealApi {
 	 * @param latitude
 	 * @param longitude
 	 * @param radius
+	 * @param ratingThresh
 	 * @return
 	 * @throws UnauthorizedException 
 	 */
@@ -93,36 +139,37 @@ public class DealApi {
 			@Nullable @Named("latitude") Float latitude,
 			@Nullable @Named("longitude") Float longitude,
 			@Nullable @Named("radius") Integer radius,
-			@Nullable @Named("sortType") Integer sortType
+			@Nullable @Named("sortType") Integer sortType,
+			@Nullable @Named("ratingThreshold") Integer ratingThresh
 		) throws UnauthorizedException {
 		
 		Util.verifyClientKey(request);
 		
+		// get sortType
 		String order = sortType == null ? "-created" : sortTypeMap.get(sortType);
 		
+		// get sorted list
 		List<Deal> deals = ObjectifyService.ofy()
 				.load()
 				.type(Deal.class)
 				.order(order)
 				.list();
 		
-		List<Deal> filtered = new LinkedList<Deal>();
-		
 		// Note: GAE does not support substring filter,
-		// so just manually filter
+		// so just manually filter product
+		List<Deal> productFiltered = new LinkedList<Deal>();
 		final String lcProduct = product.toLowerCase();
 		for (Deal deal : deals) {
 			if (deal.getProduct().toLowerCase().contains(lcProduct)) {
-				filtered.add(deal);
+				productFiltered.add(deal);
 			}
 		}
 		
-		if (latitude != null && longitude != null && radius != null) {
-			// filter for nearest
-			return filterNearest(filtered, latitude, longitude, radius);
-		} else {
-			return filtered;
-		}
+		// filter on rating threshold
+		List<Deal> ratingFiltered = filterRatingThreshold(productFiltered, ratingThresh);
+		
+		// filter for nearest
+		return filterNearest(ratingFiltered, latitude, longitude, radius);
 	}
 	
 	/**
@@ -134,6 +181,7 @@ public class DealApi {
 	 * @param latitude
 	 * @param longitude
 	 * @param radius
+	 * @param ratingThresh
 	 * @return
 	 * @throws UnauthorizedException 
 	 */
@@ -146,36 +194,37 @@ public class DealApi {
 			@Nullable @Named("latitude") Float latitude,
 			@Nullable @Named("longitude") Float longitude,
 			@Nullable @Named("radius") Integer radius,
-			@Nullable @Named("sortType") Integer sortType
+			@Nullable @Named("sortType") Integer sortType,
+			@Nullable @Named("ratingThreshold") Integer ratingThresh
 		) throws UnauthorizedException {
 		
 		Util.verifyClientKey(request);
 		
+		// get sort type
 		String order = sortType == null ? "-created" : sortTypeMap.get(sortType);
-		
+	
+		// get sorted list
 		List<Deal> deals = ObjectifyService.ofy()
 				.load()
 				.type(Deal.class)
 				.order(order)
 				.list();
 		
-		List<Deal> filtered = new LinkedList<Deal>();
-		
 		// Note: GAE does not support substring filter,
-		// so just manually filter
+		// so just manually filter store name
+		List<Deal> storeFiltered = new LinkedList<Deal>();
 		final String lcStore = store.toLowerCase();
 		for (Deal deal : deals) {
 			if (deal.getStore().toLowerCase().contains(lcStore)) {
-				filtered.add(deal);
+				storeFiltered.add(deal);
 			}
 		}
 		
-		if (latitude != null && longitude != null && radius != null) {
-			// filter for nearest
-			return filterNearest(filtered, latitude, longitude, radius);
-		} else {
-			return filtered;
-		}
+		// filter on rating threshold
+		List<Deal> ratingFiltered = filterRatingThreshold(storeFiltered, ratingThresh);
+				
+		// filter for nearest
+		return filterNearest(ratingFiltered, latitude, longitude, radius);
 	}
 	
 	/**
@@ -253,39 +302,9 @@ public class DealApi {
 		
 	}
 	
-	/**
-	 * GET NEAREST DEALS
-	 * - Descending order by created date
-	 * @param request
-	 * @param latitude
-	 * @param longitude
-	 * @param radius (in KM)
-	 * @return
-	 * @throws UnauthorizedException 
-	 */
-	@ApiMethod(name = "deal.list.near",
-		       path = "deal/list/near",
-		       httpMethod = HttpMethod.GET)
-	public List<Deal> nearestDeals(
-			HttpServletRequest request,
-			@Named("latitude") Float latitude,
-			@Named("longitude") Float longitude,
-			@Named("radius") Integer radius
-		) throws UnauthorizedException {
-		
-		Util.verifyClientKey(request);
-		
-		List<Deal> deals = ObjectifyService.ofy()
-				.load()
-				.type(Deal.class)
-				.order("-created")
-				.list();
-		
-		// filter for nearest
-		List<Deal> filtered = filterNearest(deals, latitude, longitude, radius);
-		
-		return filtered;
-	}
+	/****************************************************
+	 * DEAL METHODS
+	 ****************************************************/
 	
 	/**
 	 * GET DEAL BY ID
@@ -311,6 +330,10 @@ public class DealApi {
 			throw new NotFoundException("Deal not found");
 		return deal;
 	}
+	
+	/****************************************************
+	 * POST DEAL METHODS
+	 ****************************************************/
 	
 	/**
 	 * ADD DEAL
@@ -364,6 +387,10 @@ public class DealApi {
 		Key<Deal> dealKey = ObjectifyService.ofy().save().entity(deal).now();
 		return deal;
 	}
+	
+	/****************************************************
+	 * UPDATE DEAL METHODS
+	 ****************************************************/
 	
 	/**
 	 * UPDATE DEAL RATING
@@ -431,6 +458,10 @@ public class DealApi {
 		return deal;
 	}
 	
+	/****************************************************
+	 * DELETE DEAL METHODS
+	 ****************************************************/
+	
 	/**
 	 * DELETE DEAL
 	 * @param request
@@ -453,7 +484,34 @@ public class DealApi {
 		return new ResponseMsg("Deal deleted");
 	}
 	
-	/* ---------- HELPERS ---------- */
+	/****************************************************
+	 * HELPERS
+	 ****************************************************/
+	
+	/**
+	 * Filter out deals the are below a given rating threshold
+	 * @param deals
+	 * @param thresh
+	 * @return
+	 */
+	private List<Deal> filterRatingThreshold(List<Deal> deals, Integer thresh) {
+		
+		// if thresh not specified, don't filter
+		if (thresh == null) {
+			return deals;
+		}
+		
+		List<Deal> filtered = new LinkedList<Deal>();
+		
+		for (Deal deal : deals) {
+			if (deal.getRating() >= thresh) {
+				filtered.add(deal);
+			}
+		}
+		
+		return filtered;
+		
+	}
 	
 	/**
 	 * Filter out deals that are further than a given radius
@@ -464,7 +522,12 @@ public class DealApi {
 	 * @return
 	 */
 	private List<Deal> filterNearest(
-			List<Deal> deals, double latitude, double longitude, int radius) {
+			List<Deal> deals, Float latitude, Float longitude, Integer radius) {
+		
+		// if location/radius not specified, don't filter
+		if (latitude == null || longitude == null || radius == null) {
+			return deals;
+		}
 		
 		List<Deal> filtered = new LinkedList<Deal>();
 		

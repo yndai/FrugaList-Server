@@ -1,12 +1,12 @@
 package com.ryce.frugalist;
 
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+
 import com.googlecode.objectify.ObjectifyService;
 import com.ryce.frugalist.model.Deal;
 import com.ryce.frugalist.model.Freebie;
 import com.ryce.frugalist.model.User;
-
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletContextEvent;
 
 /**
  * OfyHelper, a ServletContextListener, is setup in web.xml to run before a Servlet is run.  
